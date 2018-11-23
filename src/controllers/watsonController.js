@@ -21,8 +21,7 @@ watsonController.analyseLanguage = async (req, res) => {
     'features': {
       'keywords': {
         'sentiment': true,
-        'emotion': true,
-        'limit': 3
+        'emotion': true
       }
     }
   };
