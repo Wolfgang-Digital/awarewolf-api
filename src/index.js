@@ -24,10 +24,14 @@ app.use(compression());
 
 if (process.env.NODE_ENV !== 'production') app.use(logger('dev'));
 
+// Start Heroku mount.
+app.get('/', (req, res) => res.send('Ok'));
+
+// Public routes.
 app.use('/auth', auth);
 app.use('/watson', watson);
 
-// Authorisation required for these routes.
+// Private routes.
 app.use('/api', verifyJwt, awarewolf);
 app.use('/user', verifyJwt, user);
 
