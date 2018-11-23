@@ -7,7 +7,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import validator from 'express-validator';
 import compression from 'compression';
-import { auth, awarewolf, user } from './routes';
+import { auth, awarewolf, user, watson } from './routes';
 import { verifyJwt } from './utils';
 
 const app = express();
@@ -25,6 +25,7 @@ app.use(compression());
 if (process.env.NODE_ENV !== 'production') app.use(logger('dev'));
 
 app.use('/auth', auth);
+app.use('/watson', watson);
 
 // Authorisation required for these routes.
 app.use('/api', verifyJwt, awarewolf);
