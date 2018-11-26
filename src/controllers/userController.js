@@ -1,5 +1,5 @@
 import db from '../models';
-import { comparePasswords, signJwt } from '../utils';
+import { comparePasswords, signJwt, hashPassword } from '../utils';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import cloudinary from 'cloudinary';
@@ -222,6 +222,92 @@ userController.getUsers = async (req, res) => {
     });
   } catch (err) {
     res.status(400).json({ messages: ['Error: Object not found.'] });
+  }
+};
+
+userController.resetPassword = async (req, res) => {
+  req.check('email', 'Email is not valid.').isEmail();
+  req.check('email', 'Email cannot be blank.').notEmpty();
+
+  // Check validation errors.
+  const errors = req.validationErrors();
+  if (errors) return res.status(400).json({ messages: errors.map(e => e.msg) });
+
+  try {
+    const resetToken = crypto.randomBytes(16).toString('hex');
+
+    const user = await db.User.findOneAndUpdate({
+      'email': decodeURIComponent(req.params.email)
+    }, {
+      $set: { 
+        'passwordResetToken': resetToken,
+        'passwordResetExpires': Date.now() + 86400000
+      }
+    });
+
+    const transporter = nodemailer.createTransport({
+      service: 'Sendgrid',
+      auth: {
+        user: process.env.SENDGRID_USERNAME,
+        pass: process.env.SENDGRID_PASSWORD
+      }
+    });
+    const mailOptions = {
+      from: 'no-reply@awarewolf.com',
+      to: user.email,
+      subject: 'Awarewolf Password Reset',
+      text: `Hi ${capitaliseWord(user.username)},\n\n` +
+            `To reset your password click following link: \nhttps:\/\/awarewolf.netlify.com\/reset-password\/${resetToken}.\n\n` +
+            `This link will expire in 24 hours.`
+    };
+    transporter.sendMail(mailOptions, (err) => {
+      if (err) {
+        return res.status(500).json({ messages: ['Error sending password reset email.'] });
+      }
+      return res.status(200).json({ success: true, data: `Password reset email sent.` });
+    });
+  } catch (err) {
+    console.log(error);
+    res.status(400).json({ messages: [err.toString()] });
+  }
+};
+
+userController.confirmReset = async (req, res) => {
+  try {
+    const { resetToken, password } = req.body.data;
+
+    if (!resetToken || !password) return res.status(400).json({ messages: ['Missing password or token.'] });
+   
+    const user = await db.User.findOneAndUpdate({
+      'passwordResetToken': resetToken,
+      'passwordResetExpires': {
+        $gt: Date.now()
+      }
+    },{
+      $set: {
+        'password': hashPassword(password),
+        'passwordResetToken': '',
+        'passwordResetExpires': null
+      }
+    })
+    
+    if (user) {
+      res.status(200).json({
+        success: true,
+        data: {
+          username: user.username,
+          id: user._id,
+          token: signJwt(user),
+          avatar: user.avatar,
+          roles: user.roles
+        }
+      });
+    } else {
+      res.status(400).json({ messages: ['Invalid or expired token.'] });
+    }
+
+  } catch(err) {
+    res.status(400).json({ messages: ['User not found.'] })
   }
 };
 
