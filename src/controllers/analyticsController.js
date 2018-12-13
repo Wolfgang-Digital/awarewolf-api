@@ -14,7 +14,7 @@ analyticsController.getSeoGAData = async (req, res) => {
     const { sheet } = req.params;
 
     const client = await google.auth.getClient({
-      keyFile: 'keys.json',
+      keyFile: '../keys.json',
       scopes: [
         'https://www.googleapis.com/auth/spreadsheets'
       ]
