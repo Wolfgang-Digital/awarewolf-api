@@ -7,7 +7,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import validator from 'express-validator';
 import compression from 'compression';
-import { auth, awarewolf, user, watson } from './routes';
+import { auth, awarewolf, user, watson, analytics } from './routes';
 import { verifyJwt } from './utils';
 
 const app = express();
@@ -34,6 +34,7 @@ app.use('/watson', watson);
 // Private routes.
 app.use('/api', verifyJwt, awarewolf);
 app.use('/user', verifyJwt, user);
+app.use('/analytics', verifyJwt, analytics);
 
 app.listen(PORT, () => {
   if (process.env.NODE_ENV === 'development') console.log(`Running on ${PORT}`)

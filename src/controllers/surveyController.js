@@ -23,7 +23,10 @@ surveyController.findById = async(req, res) => {
   try {
     const survey = await db.Survey.findById(req.params.id);
 
-    if (!req.user.roles.includes('admin')) survey.userResponses = [];
+    if (!req.user.roles.includes('admin'))  {
+      survey.userResponses = [];
+      survey.answers = [];
+    }
 
     res.status(200).json({
       success: true,
