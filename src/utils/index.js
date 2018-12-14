@@ -1,5 +1,6 @@
 import { signJwt, verifyJwt, comparePasswords, hashPassword } from './auth';
 import upload, { fileErrorHandler } from './fileUpload';
+import * as transform from './transform';
 
 export {
 	signJwt,
@@ -7,5 +8,6 @@ export {
 	comparePasswords,
 	hashPassword,
 	upload,
-	fileErrorHandler
+	fileErrorHandler,
+	transform
 };

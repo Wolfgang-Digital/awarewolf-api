@@ -1,18 +1,29 @@
-import { google } from 'googleapis'; 
+import { google } from 'googleapis';
+import { transform } from '../utils'; 
 
-const spreadsheetId = '1Ja1_T66j4oekhlQo1eQVMiqye6w2evngj3LIKWrwmgI';
+const SEO_SHEET_ID = '1Ja1_T66j4oekhlQo1eQVMiqye6w2evngj3LIKWrwmgI';
+
+const SHEETS = {
+  'ga-month-mom': 'GA_LastmonthMoM',
+  'ga-month-yoy': 'GA_LastmonthYoY',
+  'ga-days-mom': 'GA_30daysMoM',
+  'ga-days-yoy': 'GA_30daysYoY'
+};
 
 const analyticsController = {};
 
 analyticsController.getSeoGAData = async (req, res) => {
-  req.check('sheet', 'No sheet specified');
+  req.check('name', 'No sheet specified');
 
   const errors = req.validationErrors();
   if (errors) return res.status(400).json({ messages: errors.map(e => e.msg) });
 
-  try {
-    const { sheet } = req.params;
+  const { name } = req.params;
+  const sheet = SHEETS[name];
 
+  if (!sheet) return res.status(400).json({ messages: [`Couldn't find sheet: ${name}`] });
+
+  try {
     const client = await google.auth.getClient({
       credentials: {
         client_email: process.env.GOOGLE_EMAIL,
@@ -26,53 +37,62 @@ analyticsController.getSeoGAData = async (req, res) => {
 
     const response = await sheets.spreadsheets.values.get({
       auth: client,
-      spreadsheetId,
+      spreadsheetId: SEO_SHEET_ID,
       range: `${sheet}!A3:O1000`,
       majorDimension: 'ROWS'
     });
 
     if (response.status === 200) {
-      const results = response.data.values.filter(row => {
-        if (row.some(n => {
-          if (!isNaN(n)) return false;
-          if (n.includes('GA Account')) return true;
-          else if (n.includes('UNSAMPLED')) return true;
-          else return false;
-        })) {
-          return false;
-        } else if (row.every(n => n.length === 0)) {
-          return false;
-        } else {
-          return true;
-        }
-      }).map(n => {
-        return {
-          gaAccount: n[0],
-          lead: n[1],
-          team: n[2],
-          client: n[3],
-          view: n[4],
-          sessions: n[5],
-          deltaSessions: n[6],
-          bounces: n[7],
-          deltaBounces: n[8],
-          newUsers: n[9],
-          deltaNewUsers: n[10],
-          conversions: n[11],
-          deltaConversions: n[12],
-          revenue: n[13],
-          deltaRevenue: n[14]
-        };
-      });
+      const results = transform.gaSeoSheet(response.data);
       return res.status(200).json({
         success: true,
         data: results
       });
     }
-    console.log('Error');
     res.status(400).json({ messages: ['Failed to fetch data'] });
   } catch (err) {
-    console.log(err);
+    res.status(400).json({ messages: [err.toString()] });
+  }
+};
+
+analyticsController.getGADataWithDates = async (req, res) => {
+  // TODO: Validate
+
+  try {
+    const client = await google.auth.getClient({
+      credentials: {
+        client_email: process.env.GOOGLE_EMAIL,
+        private_key: decodeURIComponent(process.env.GOOGLE_KEY)
+      },
+      scopes: [
+        'https://www.googleapis.com/auth/analytics.readonly'
+      ]
+    });
+    const analytics = google.analyticsreporting({
+      auth: client,
+      version: 'v4'
+    });
+    const response = await analytics.reports.batchGet({
+      requestBody: {
+        reportRequests: [
+          {
+            viewId: '82667922',
+            dateRanges: [
+              { startDate: '2018-11-01', endDate: '2018-11-30' }
+            ],
+            dimensions: [
+              { name: 'ga:browser' }
+            ],
+            metrics: [
+              { expression: 'ga:users' }
+            ]
+          }
+        ]
+      }
+    });
+    res.status(200).json(response.data);
+
+  } catch (err) {
     res.status(400).json({ messages: [err.toString()] });
   }
 };
