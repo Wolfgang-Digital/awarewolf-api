@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { awarewolfDB } from '../index';
 
 const Schema = mongoose.Schema;
 

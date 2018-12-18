@@ -1,10 +1,15 @@
 import { Router } from 'express';
 
-import { analyticsController } from '../controllers';
+import { analyticsController, clientController } from '../controllers';
 
 const router = Router();
 
-router.get('/sheets/:name', analyticsController.getSeoGAData);
+// Data routes
+router.get('/sheet/:dept/:range', analyticsController.getDataFromSheet);
 //router.get('/data', analyticsController.getGADataWithDates);
+
+// Client routes
+router.post('/clients', clientController.addClient);
+router.patch('/clients/:clientId', clientController.updateClient);
 
 export default router;

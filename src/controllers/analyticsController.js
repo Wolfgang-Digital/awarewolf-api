@@ -1,27 +1,65 @@
 import { google } from 'googleapis';
-import { transform } from '../utils'; 
-
-const SEO_SHEET_ID = '1Ja1_T66j4oekhlQo1eQVMiqye6w2evngj3LIKWrwmgI';
+import { transform } from '../utils';
+import db from '../models';
 
 const SHEETS = {
-  'ga-month-mom': 'GA_LastmonthMoM',
-  'ga-month-yoy': 'GA_LastmonthYoY',
-  'ga-days-mom': 'GA_30daysMoM',
-  'ga-days-yoy': 'GA_30daysYoY'
+  'seo': '1Ja1_T66j4oekhlQo1eQVMiqye6w2evngj3LIKWrwmgI',
+  'social': '12QkwN8bYvMFsqrJT-i57DIvZdztP8UlfqKnmthNTfg0'
+};
+
+const SEO = {
+  'ga-lastmonth-mom': {
+    sheet: 'GA_LastmonthMoM',
+    start: 'A3',
+    end: 'O1000'
+  },
+  'ga-lastmonth-yoy': {
+    sheet: 'GA_LastmonthYoY',
+    start: 'A3',
+    end: 'O1000'
+  },
+  'ga-30days-mom': {
+    sheet: 'GA_30daysMoM',
+    start: 'A3',
+    end: 'O1000'
+  },
+  'ga-30days-yoy': {
+    sheet: 'GA_30daysYoY',
+    start: 'A3',
+    end: 'O1000'
+  }
+};
+
+const SOCIAL = {
+  'fb-lastmonth-mom': {
+    sheet: 'FB_ThismonthMoM',
+    start: 'A3',
+    end: 'BE1000'
+  },
+  'fb-7days-mom': {
+    sheet: 'FB_7DaysMoM',
+    start: 'A3',
+    end: 'BE1000'
+  }
 };
 
 const analyticsController = {};
 
-analyticsController.getSeoGAData = async (req, res) => {
-  req.check('name', 'No sheet specified');
+analyticsController.getDataFromSheet = async (req, res) => {
+  req.check('dept', 'No department specified').notEmpty();
+  req.check('range', 'No range specified').notEmpty();
 
   const errors = req.validationErrors();
   if (errors) return res.status(400).json({ messages: errors.map(e => e.msg) });
 
-  const { name } = req.params;
-  const sheet = SHEETS[name];
+  const { dept, range } = req.params;
+  const spreadsheetId = SHEETS[dept];
+  const config = 
+    dept === 'seo' ? SEO[range] : 
+    dept === 'social' ? SOCIAL[range] :
+    null;
 
-  if (!sheet) return res.status(400).json({ messages: [`Couldn't find sheet: ${name}`] });
+  if (!config || !spreadsheetId) return res.status(400).json({ messages: [`Couldn't find sheet for: ${dept} - ${range}`] });
 
   try {
     const client = await google.auth.getClient({
@@ -37,13 +75,19 @@ analyticsController.getSeoGAData = async (req, res) => {
 
     const response = await sheets.spreadsheets.values.get({
       auth: client,
-      spreadsheetId: SEO_SHEET_ID,
-      range: `${sheet}!A3:O1000`,
+      spreadsheetId,
+      range: `${config.sheet}!${config.start}:${config.end}`,
       majorDimension: 'ROWS'
     });
 
     if (response.status === 200) {
-      const results = transform.gaSeoSheet(response.data);
+      let results = [];
+      if (dept === 'seo') {
+        results = transform.gaSeoSheet(response.data);
+      } else {
+        results = transform.fbSocialSheet(response.data);
+      }
+
       return res.status(200).json({
         success: true,
         data: results
@@ -92,6 +136,26 @@ analyticsController.getGADataWithDates = async (req, res) => {
     });
     res.status(200).json(response.data);
 
+  } catch (err) {
+    res.status(400).json({ messages: [err.toString()] });
+  }
+};
+
+analyticsController.getPageSpeedData = async (req, res) => {
+  req.check('clientId', 'Client ID cannot be blank').notEmpty();
+
+  const errors = req.validationErrors();
+  if (errors) return res.status(400).json({ messages: errors.map(e => e.msg) });
+
+  try {
+    const client = await db.Client.findById(req.params.clientId);
+    if (!client) return res.status(400).json({ messages: [`Unable to locate client: ${req.params.clientId}`] });
+
+    const data = await services.getPageSpeed(client.domain);
+    res.status(200).json({
+      success: true,
+      data
+    });
   } catch (err) {
     res.status(400).json({ messages: [err.toString()] });
   }

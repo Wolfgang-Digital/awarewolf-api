@@ -42,7 +42,7 @@ app.listen(PORT, () => {
 
 // MongoDB configuration.
 mongoose.connect(DB_URI, { useNewUrlParser: true }, () => {
-  if (process.env.NODE_ENV === 'development') console.log('Connected to MongoDB')
+  if (process.env.NODE_ENV === 'development') console.log('Connected to MongoDB');
 });
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));

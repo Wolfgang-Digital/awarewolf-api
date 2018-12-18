@@ -5,6 +5,7 @@ import surveyController from './surveyController';
 import watsonController from './watsonController';
 import trendsController from './trendsController';
 import analyticsController from './analyticsController';
+import clientController from './clientController';
 
 export {
 	userController,
@@ -13,5 +14,6 @@ export {
 	surveyController,
 	watsonController,
 	trendsController,
-	analyticsController
+	analyticsController,
+	clientController
 };
