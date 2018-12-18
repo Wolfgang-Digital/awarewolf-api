@@ -9,6 +9,7 @@ router.get('/sheet/:dept/:range', analyticsController.getDataFromSheet);
 //router.get('/data', analyticsController.getGADataWithDates);
 
 // Client routes
+router.get('/clients', clientController.getClients);
 router.post('/clients', clientController.addClient);
 router.patch('/clients/:clientId', clientController.updateClient);
 

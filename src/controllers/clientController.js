@@ -42,6 +42,18 @@ clientController.addClient = async (req, res) => {
   }
 };
 
+clientController.getClients = async (req, res) => {
+  try {
+    const clients = db.Client.find({}).select('-password');
+    res.status(200).json({
+      success: true,
+      data: clients
+    })
+  } catch (err) {
+    res.status(400).json({ messages: [err.toString()] });
+  }
+};
+
 clientController.updateClient = async (req, res) => {
   req.check('clientId', 'Client ID cannot be blank').notEmpty();
 
