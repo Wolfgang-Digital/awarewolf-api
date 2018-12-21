@@ -15,5 +15,6 @@ router.post('/upload', (req, res, next) => {
 
 router.get('/', userController.getUsers);
 router.put('/remove-avatar', userController.removeAvatar);
+router.get('/preferences/:userId', userController.getUserPreferences);
 
 export default router;

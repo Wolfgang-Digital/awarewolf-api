@@ -311,4 +311,30 @@ userController.confirmReset = async (req, res) => {
   }
 };
 
+userController.getUserPreferences = async (req, res) => {
+  req.check('userId', 'User ID cannot be blank.');
+
+  const errors = req.validationErrors();
+  if (errors) return res.status(400).json({ messages: errors.map(e => e.msg) });
+
+  try {
+    let preferences = await db.Preferences.findOne({ _user: req.params.userId });
+
+    if (!preferences) {
+      preferences = new db.Preferences({
+        _user: req.params.userId,
+        metrics: ['roas', 'traffic', 'conversions'],
+        services: ['seo', 'paid search', 'social']
+      });
+    }
+
+    res.status({
+      success: true,
+      data: preferences
+    });
+  } catch (err) {
+    res.status(400).json({ messages: [err.toString()] })
+  }
+};
+
 export default userController;

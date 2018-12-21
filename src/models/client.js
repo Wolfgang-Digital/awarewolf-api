@@ -14,7 +14,6 @@ const clientSchema = new Schema({
     minLength: [8, 'Password must be at least 8 characters long.']
   },
   kpis: [{ type: String, trim: true }],
-  summaryMetrics: [{ type: String, trim: true }],
   services: [{ type: String, trim: true }],
   lead: [{  type: String, required: true, trim: true }],
   team: [{ type: String, required: true, trim: true }],
