@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
 
-const preferencesSchema = mongoose.Schema({
+const Schema = mongoose.Schema;
+
+const preferencesSchema = Schema({
   _user: { type: Schema.ObjectId, ref: 'User', required: true },
   metrics: [{ type: String, trim: true }],
   services: [{ type: String, trim: true }]
