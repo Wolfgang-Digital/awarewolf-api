@@ -1,47 +1,6 @@
 import { google } from 'googleapis';
-import { transform } from '../utils';
+import { transform, constants } from '../utils';
 import db from '../models';
-
-const SHEETS = {
-  'seo': '1Ja1_T66j4oekhlQo1eQVMiqye6w2evngj3LIKWrwmgI',
-  'social': '12QkwN8bYvMFsqrJT-i57DIvZdztP8UlfqKnmthNTfg0'
-};
-
-const SEO = {
-  'ga-lastmonth-mom': {
-    sheet: 'GA_LastmonthMoM',
-    start: 'A3',
-    end: 'O1000'
-  },
-  'ga-lastmonth-yoy': {
-    sheet: 'GA_LastmonthYoY',
-    start: 'A3',
-    end: 'O1000'
-  },
-  'ga-30days-mom': {
-    sheet: 'GA_30daysMoM',
-    start: 'A3',
-    end: 'O1000'
-  },
-  'ga-30days-yoy': {
-    sheet: 'GA_30daysYoY',
-    start: 'A3',
-    end: 'O1000'
-  }
-};
-
-const SOCIAL = {
-  'fb-lastmonth-mom': {
-    sheet: 'FB_ThismonthMoM',
-    start: 'A3',
-    end: 'BE1000'
-  },
-  'fb-7days-mom': {
-    sheet: 'FB_7DaysMoM',
-    start: 'A3',
-    end: 'BE1000'
-  }
-};
 
 const analyticsController = {};
 
@@ -53,10 +12,10 @@ analyticsController.getDataFromSheet = async (req, res) => {
   if (errors) return res.status(400).json({ messages: errors.map(e => e.msg) });
 
   const { dept, range } = req.params;
-  const spreadsheetId = SHEETS[dept];
+  const spreadsheetId = constants.SPREADSHEET_IDS[dept];
   const config = 
-    dept === 'seo' ? SEO[range] : 
-    dept === 'social' ? SOCIAL[range] :
+    dept === 'seo' ? SEO_SHEETS[range] : 
+    dept === 'social' ? SOCIAL_SHEETS[range] :
     null;
 
   if (!config || !spreadsheetId) return res.status(400).json({ messages: [`Couldn't find sheet for: ${dept} - ${range}`] });
@@ -124,11 +83,8 @@ analyticsController.getGADataWithDates = async (req, res) => {
             dateRanges: [
               { startDate: '2018-11-01', endDate: '2018-11-30' }
             ],
-            dimensions: [
-              { name: 'ga:browser' }
-            ],
             metrics: [
-              { expression: 'ga:users' }
+              { expression: 'ga:sessions' }
             ]
           }
         ]
@@ -136,26 +92,6 @@ analyticsController.getGADataWithDates = async (req, res) => {
     });
     res.status(200).json(response.data);
 
-  } catch (err) {
-    res.status(400).json({ messages: [err.toString()] });
-  }
-};
-
-analyticsController.getPageSpeedData = async (req, res) => {
-  req.check('clientId', 'Client ID cannot be blank').notEmpty();
-
-  const errors = req.validationErrors();
-  if (errors) return res.status(400).json({ messages: errors.map(e => e.msg) });
-
-  try {
-    const client = await db.Client.findById(req.params.clientId);
-    if (!client) return res.status(400).json({ messages: [`Unable to locate client: ${req.params.clientId}`] });
-
-    const data = await services.getPageSpeed(client.domain);
-    res.status(200).json({
-      success: true,
-      data
-    });
   } catch (err) {
     res.status(400).json({ messages: [err.toString()] });
   }

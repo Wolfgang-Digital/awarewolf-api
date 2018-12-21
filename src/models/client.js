@@ -16,9 +16,13 @@ const clientSchema = new Schema({
   kpis: [{ type: String, trim: true }],
   summaryMetrics: [{ type: String, trim: true }],
   services: [{ type: String, trim: true }],
-  _lead: [{  type: String, required: true, trim: true }],
-  _team: [{ type: String, required: true, trim: true }],
-  pageSpeedSheetId: { type: String, trim: true }
+  lead: [{  type: String, required: true, trim: true }],
+  team: [{ type: String, required: true, trim: true }],
+  pageSpeedSheetId: { type: String, trim: true },
+  budgets: {
+    seo: { type: Number },
+    social: { type: Number }
+  }
 });
 
 export default mongoose.model('Client', clientSchema);

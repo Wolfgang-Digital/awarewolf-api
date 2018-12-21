@@ -15,12 +15,12 @@ clientController.addClient = async (req, res) => {
   if (errors) return res.status(400).json({ messages: errors.map(e => e.msg) });
 
   try {
-    const { client, lead, team, domain, ga_account, ga_viewName, ga_viewNum, kpis, services, summaryMetrics, pageSpeedSheetId } = req.body;
+    const { client, lead, team, domain, ga_account, ga_viewName, ga_viewNum, kpis, services, summaryMetrics, pageSpeedSheetId, budgets } = req.body;
 
     const newClient = new db.Client({
       name: client,
-      _lead: lead.split(', '),
-      _team: team ? team.split(', ') : [],
+      lead: lead.split(', '),
+      team: team ? team.split(', ') : [],
       gaAccount: ga_account,
       gaViewName: ga_viewName,
       gaViewNum: ga_viewNum,
@@ -28,7 +28,8 @@ clientController.addClient = async (req, res) => {
       kpis: kpis ? kpis.split(', ') : [],
       services: services ? services.split(', ') : [],
       summaryMetrics: summaryMetrics ? summaryMetrics.split(', ') : [],
-      pageSpeedSheetId
+      pageSpeedSheetId,
+      budgets: budgets || { seo: 0, social: 0 }
     });
 
     await newClient.save();
@@ -44,7 +45,7 @@ clientController.addClient = async (req, res) => {
 
 clientController.getClients = async (req, res) => {
   try {
-    const clients = db.Client.find({}).select('-password');
+    const clients = await db.Client.find({}).select('-password');
     res.status(200).json({
       success: true,
       data: clients
@@ -60,12 +61,12 @@ clientController.updateClient = async (req, res) => {
   const errors = req.validationErrors();
   if (errors) return res.status(400).json({ messages: errors.map(e => e.msg) });
 
-  const { client, lead, team, domain, ga_account, ga_viewName, ga_viewNum, kpis, services, summaryMetrics, password, pageSpeedSheetId } = req.body;
+  const { client, lead, team, domain, ga_account, ga_viewName, ga_viewNum, kpis, services, summaryMetrics, password, pageSpeedSheetId, budget } = req.body;
 
   const params = {
     name: client,
-    _lead: lead.split(', '),
-    _team: team ? team.split(', ') : [],
+    lead: lead.split(', '),
+    team: team ? team.split(', ') : [],
     gaAccount: ga_account,
     gaViewName: ga_viewName,
     gaViewNum: ga_viewNum,
@@ -74,14 +75,15 @@ clientController.updateClient = async (req, res) => {
     services: services ? services.split(',') : [],
     summaryMetrics: summaryMetrics ? summaryMetrics.split(', ') : [],
     pageSpeedSheetId,
-    password: password ? hashPassword(password) : null
+    password: password ? hashPassword(password) : null,
+    budgets: budgets || { seo: 0, social: 0 }
   };
   for (const prop in params) {
     if (!params[prop]) delete params[prop];
   }
 
   try {
-    const updated = await db.Client.findByIdAndUpdate(req.params.clientId, params, { new: true });
+    const updated = await db.Client.findByIdAndUpdate(req.params.clientId, params, { new: true }).select('-password');
     res.status(200).json({
       success: true,
       data: updated
