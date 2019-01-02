@@ -35,7 +35,9 @@ export const gaSeoSheet = data => {
 
 export const fbSocialSheet = data => {
   return data.values.filter(row => {
-    return !row.every(n => n.length === 0);
+    if (row.every(n => n.length === 0)) return false;
+    if (!row[1]) return false;
+    return true;
   }).map(row => {
     return {
       client: row[1],
@@ -97,7 +99,7 @@ export const fbSocialSheet = data => {
         deltaWebLeads: row[49],
         cpWebLead: row[50],
         deltaCpWebLead: row[51],
-        messageingReplies: row[52],
+        messagingReplies: row[52],
         deltaMessagingReplies: row[53],
         cpMessagingReply: row[54],
         deltaCpMessagingReply: row[55]
@@ -108,4 +110,10 @@ export const fbSocialSheet = data => {
       }
     };
   });
+};
+
+export const compileSeoData = data => {
+  const filteredData = data.map(gaSeoSheet); 
+
+  return filteredData;
 };

@@ -327,13 +327,44 @@ userController.getUserPreferences = async (req, res) => {
         services: ['seo', 'paid search', 'social']
       });
     }
+    await preferences.save();
 
-    res.status({
+    res.status(200).json({
       success: true,
       data: preferences
     });
   } catch (err) {
-    res.status(400).json({ messages: [err.toString()] })
+    res.status(400).json({ messages: [err.toString()] });
+  }
+};
+
+userController.updateUserPreferences = async (req, res) => {
+  req.check('userId', 'User ID cannot be blank.');
+
+  const errors = req.validationErrors();
+  if (errors) return res.status(400).json({ messages: errors.map(e => e.msg) });
+
+  let params = {
+    metrics: req.body.metrics,
+    services: req.body.services
+  };
+  for (const prop in params) {
+    if (!params[prop]) delete params[prop];
+  }
+
+  try {
+    const preferences = await db.Preferences.findOneAndUpdate(
+      { _user: req.params.userId },
+      params,
+      { new: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      data: preferences
+    });
+  } catch (err) {
+    res.status(400).json({ messages: [err.toString()] });
   }
 };
 

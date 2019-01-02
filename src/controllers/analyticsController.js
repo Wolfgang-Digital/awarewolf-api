@@ -1,6 +1,5 @@
 import { google } from 'googleapis';
 import { transform, constants } from '../utils';
-import db from '../models';
 
 const analyticsController = {};
 
@@ -14,8 +13,8 @@ analyticsController.getDataFromSheet = async (req, res) => {
   const { dept, range } = req.params;
   const spreadsheetId = constants.SPREADSHEET_IDS[dept];
   const config = 
-    dept === 'seo' ? SEO_SHEETS[range] : 
-    dept === 'social' ? SOCIAL_SHEETS[range] :
+    dept === 'seo' ? constants.SEO_SHEETS[range] : 
+    dept === 'social' ? constants.SOCIAL_SHEETS[range] :
     null;
 
   if (!config || !spreadsheetId) return res.status(400).json({ messages: [`Couldn't find sheet for: ${dept} - ${range}`] });
@@ -49,7 +48,11 @@ analyticsController.getDataFromSheet = async (req, res) => {
 
       return res.status(200).json({
         success: true,
-        data: results
+        data: {
+          dept,
+          range,
+          clients: results
+        }
       });
     }
     res.status(400).json({ messages: ['Failed to fetch data'] });
@@ -92,6 +95,54 @@ analyticsController.getGADataWithDates = async (req, res) => {
     });
     res.status(200).json(response.data);
 
+  } catch (err) {
+    res.status(400).json({ messages: [err.toString()] });
+  }
+};
+
+analyticsController.getSeoData = async (req, res) => {
+  const spreadsheetId = constants.SPREADSHEET_IDS['seo'];
+
+  try {
+    const client = await google.auth.getClient({
+      credentials: {
+        client_email: process.env.GOOGLE_EMAIL,
+        private_key: decodeURIComponent(process.env.GOOGLE_KEY)
+      },
+      scopes: [
+        'https://www.googleapis.com/auth/spreadsheets'
+      ]
+    });
+    const sheets = google.sheets('v4');
+
+    const data = await Promise.all([
+      sheets.spreadsheets.values.get({
+        auth: client,
+        spreadsheetId,
+        range: `GA_LastmonthMoM!A3:O1000`
+      }),
+      sheets.spreadsheets.values.get({
+        auth: client,
+        spreadsheetId,
+        range: `GA_LastmonthYoY!A3:O1000`
+      }),
+      sheets.spreadsheets.values.get({
+        auth: client,
+        spreadsheetId,
+        range: `GA_30daysMoM!A3:O1000`
+      }),
+      sheets.spreadsheets.values.get({
+        auth: client,
+        spreadsheetId,
+        range: `GA_30daysYoY!A3:O1000`
+      })
+    ]);
+    const compiledData = transform.compileSeoData(data);
+
+    res.status(200).json({
+      success: true,
+      data: compiledData
+    });
   } catch (err) {
     res.status(400).json({ messages: [err.toString()] });
   }

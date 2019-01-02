@@ -6,6 +6,7 @@ const router = Router();
 
 // Data routes
 router.get('/sheet/:dept/:range', analyticsController.getDataFromSheet);
+//router.get('/sheet/seo', analyticsController.getSeoData);
 //router.get('/data', analyticsController.getGADataWithDates);
 
 // Client routes

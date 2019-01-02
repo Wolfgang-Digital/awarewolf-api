@@ -61,7 +61,7 @@ clientController.updateClient = async (req, res) => {
   const errors = req.validationErrors();
   if (errors) return res.status(400).json({ messages: errors.map(e => e.msg) });
 
-  const { client, lead, team, domain, ga_account, ga_viewName, ga_viewNum, kpis, services, summaryMetrics, password, pageSpeedSheetId, budget } = req.body;
+  const { client, lead, team, domain, ga_account, ga_viewName, ga_viewNum, kpis, services, summaryMetrics, password, pageSpeedSheetId, budgets } = req.body;
 
   const params = {
     name: client,
