@@ -6,8 +6,8 @@ const clientController = {};
 clientController.addClient = async (req, res) => {
   req.check('client', 'Client name cannot be blank').notEmpty();
   req.check('lead', 'Client lead cannot be blank').notEmpty();
-  req.check('domain', 'Must be a valid domain').isURL();
-  req.check('ga_account', 'Must be a valid email').isEmail();
+  req.check('domain', 'Domain must be a valid domain').isURL();
+  req.check('ga_account', 'GA Account must be a valid email').isEmail();
   req.check('ga_viewName', 'View name cannot be blank').notEmpty();
   req.check('ga_viewNum', 'View number must be a valid integer').isInt();
 
@@ -19,15 +19,15 @@ clientController.addClient = async (req, res) => {
 
     const newClient = new db.Client({
       name: client,
-      lead: lead.split(', '),
-      team: team ? team.split(', ') : [],
+      lead,
+      team: team || [],
       gaAccount: ga_account,
       gaViewName: ga_viewName,
       gaViewNum: ga_viewNum,
       domain,
-      kpis: kpis ? kpis.split(', ') : [],
-      services: services ? services.split(', ') : [],
-      summaryMetrics: summaryMetrics ? summaryMetrics.split(', ') : [],
+      kpis: kpis || [],
+      services: services || [],
+      summaryMetrics: summaryMetrics || [],
       pageSpeedSheetId,
       budgets: budgets || { seo: 0, social: 0 }
     });
@@ -65,15 +65,15 @@ clientController.updateClient = async (req, res) => {
 
   const params = {
     name: client,
-    lead: lead.split(', '),
-    team: team ? team.split(', ') : [],
+    lead,
+    team: team || [],
     gaAccount: ga_account,
     gaViewName: ga_viewName,
     gaViewNum: ga_viewNum,
     domain,
-    kpis: kpis ? kpis.split(', ') : [],
-    services: services ? services.split(',') : [],
-    summaryMetrics: summaryMetrics ? summaryMetrics.split(', ') : [],
+    kpis: kpis || [],
+    services: services || [],
+    summaryMetrics: summaryMetrics || [],
     pageSpeedSheetId,
     password: password ? hashPassword(password) : null,
     budgets: budgets || { seo: 0, social: 0 }
