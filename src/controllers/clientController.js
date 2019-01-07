@@ -15,7 +15,7 @@ clientController.addClient = async (req, res) => {
   if (errors) return res.status(400).json({ messages: errors.map(e => e.msg) });
 
   try {
-    const { client, lead, team, domain, ga_account, ga_viewName, ga_viewNum, kpis, services, summaryMetrics, pageSpeedSheetId, budgets } = req.body;
+    const { client, lead, team, domain, ga_account, ga_viewName, ga_viewNum, kpis, services, pagespeedSheet, seoName, socialName, adwordsName } = req.body;
 
     const newClient = new db.Client({
       name: client,
@@ -27,9 +27,18 @@ clientController.addClient = async (req, res) => {
       domain,
       kpis: kpis || [],
       services: services || [],
-      summaryMetrics: summaryMetrics || [],
-      pageSpeedSheetId,
-      budgets: budgets || { seo: 0, social: 0 }
+      departmentDetails: {
+        seo: {
+          name: seoName,
+          pagespeedSheetId: pagespeedSheet
+        },
+        social: {
+          name: socialName
+        },
+        paidSearch: {
+          name: adwordsName
+        }
+      }
     });
 
     await newClient.save();
@@ -61,7 +70,7 @@ clientController.updateClient = async (req, res) => {
   const errors = req.validationErrors();
   if (errors) return res.status(400).json({ messages: errors.map(e => e.msg) });
 
-  const { client, lead, team, domain, ga_account, ga_viewName, ga_viewNum, kpis, services, summaryMetrics, password, pageSpeedSheetId, budgets } = req.body;
+  const { client, lead, team, domain, ga_account, ga_viewName, ga_viewNum, kpis, services, password, pagespeedSheet, seoName, socialName, adwordsName } = req.body;
 
   const params = {
     name: client,
@@ -76,8 +85,23 @@ clientController.updateClient = async (req, res) => {
     summaryMetrics: summaryMetrics || [],
     pageSpeedSheetId,
     password: password ? hashPassword(password) : null,
-    budgets: budgets || { seo: 0, social: 0 }
+    departmentDetails: {
+      seo: {
+        name: seoName,
+        pageSpeedSheetId: pagespeedSheet
+      },
+      social: {
+        name: socialName
+      },
+      paidSearch: {
+        name: adwordsName
+      }
+    }
   };
+  for (const prop in params.departmentDetails) {
+    if (!params.departmentDetails[prop].name) delete params.departmentDetails[prop].name;
+  }
+  if (!params.departmentDetails.seo.pageSpeedSheetId) delete params.departmentDetails.seo.pageSpeedSheetId;
   for (const prop in params) {
     if (!params[prop]) delete params[prop];
   }

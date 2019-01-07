@@ -13,14 +13,24 @@ const clientSchema = new Schema({
     trim: true,
     minLength: [8, 'Password must be at least 8 characters long.']
   },
-  kpis: [{ type: String, trim: true }],
+  kpis: [{
+    name: { type: String, trim: true },
+    monthlyTarget: { type: Number }
+  }],
   services: [{ type: String, trim: true }],
   lead: [{  type: String, required: true, trim: true }],
   team: [{ type: String, required: true, trim: true }],
-  pageSpeedSheetId: { type: String, trim: true },
-  budgets: {
-    seo: { type: Number },
-    social: { type: Number }
+  departmentDetails: {
+    seo: {
+      name: { type: String, trim: true },
+      pagespeedSheetId: { type: String, trim: true }
+    },
+    social: {
+      name: { type: String, trim: true }
+    },
+    paidSearch: {
+      name: { type: String, trim: true }
+    }
   }
 });
 
