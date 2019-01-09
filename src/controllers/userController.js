@@ -323,8 +323,7 @@ userController.getUserPreferences = async (req, res) => {
     if (!preferences) {
       preferences = new db.Preferences({
         _user: req.params.userId,
-        metrics: ['Sessions', 'ROAS', 'Conversions'],
-        services: ['SEO', 'Paid Search', 'Social']
+        metrics: ['Sessions', 'ROAS', 'Conversions', 'Conversion Rate', 'Revenue']
       });
     }
     await preferences.save();
