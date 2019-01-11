@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import db from '../models';
 
-const MAX_AGE = process.env.NODE_ENV === 'development' ? '12h' : '6h';
+const MAX_AGE = '8h';
 const SALT_ROUNDS = 10;
 
 const signJwt = ({ _id }) => {

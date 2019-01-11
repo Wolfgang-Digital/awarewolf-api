@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 
 const clientSchema = new Schema({
   name: { type: String, required: true, trim: true, unique: true },
-  domain: { type: String, required: true, trim: true },
+  domain: { type: String, trim: true },
   gaAccount: { type: String, required: true, trim: true },
   gaViewName: { type: String, required: true, trim: true },
   gaViewNum: { type: Number, required: true },
@@ -20,18 +20,8 @@ const clientSchema = new Schema({
   services: [{ type: String, trim: true }],
   lead: [{  type: String, required: true, trim: true }],
   team: [{ type: String, required: true, trim: true }],
-  departmentDetails: {
-    seo: {
-      name: { type: String, trim: true },
-      pagespeedSheetId: { type: String, trim: true }
-    },
-    social: {
-      name: { type: String, trim: true }
-    },
-    paidSearch: {
-      name: { type: String, trim: true }
-    }
-  }
+  pagespeedSheetId: { type: String, trim: true },
+  facebookId: { type: String, trim: true }
 });
 
 export default mongoose.model('Client', clientSchema);

@@ -1,12 +1,11 @@
 import db from '../models';
-import { hashPassword } from '../utils';
+import { hashPassword, addClient } from '../utils';
 
 const clientController = {};
 
 clientController.addClient = async (req, res) => {
   req.check('client', 'Client name cannot be blank').notEmpty();
   req.check('lead', 'Client lead cannot be blank').notEmpty();
-  req.check('domain', 'Domain must be a valid domain').isURL();
   req.check('ga_account', 'GA Account must be a valid email').isEmail();
   req.check('ga_viewName', 'View name cannot be blank').notEmpty();
   req.check('ga_viewNum', 'View number must be a valid integer').isInt();
@@ -15,40 +14,32 @@ clientController.addClient = async (req, res) => {
   if (errors) return res.status(400).json({ messages: errors.map(e => e.msg) });
 
   try {
-    const { client, lead, team, domain, ga_account, ga_viewName, ga_viewNum, kpis, services, pagespeedSheet, seoName, socialName, adwordsName } = req.body;
+    const { client, lead, team, domain, ga_account, ga_viewName, ga_viewNum, kpis, services, pagespeedSheetId, facebookId } = req.body;
 
     const newClient = new db.Client({
       name: client,
       lead,
-      team: team || [],
+      team,
       gaAccount: ga_account,
       gaViewName: ga_viewName,
       gaViewNum: ga_viewNum,
       domain,
-      kpis: kpis || [],
-      services: services || [],
-      departmentDetails: {
-        seo: {
-          name: seoName,
-          pagespeedSheetId: pagespeedSheet
-        },
-        social: {
-          name: socialName
-        },
-        paidSearch: {
-          name: adwordsName
-        }
-      }
+      kpis,
+      services,
+      pagespeedSheetId,
+      facebookId
     });
 
     await newClient.save();
+    await addClient(newClient);
 
     res.status(200).json({
       success: true,
       data: newClient
     });
   } catch (err) {
-    res.status(400).json({ messages: [err.toString()] });
+    const errMsg = err.toString().indexOf('duplicate key error') > -1 ? 'Client already exists in database' : err.toString();
+    res.status(400).json({ messages: [errMsg] });
   }
 };
 
@@ -70,38 +61,22 @@ clientController.updateClient = async (req, res) => {
   const errors = req.validationErrors();
   if (errors) return res.status(400).json({ messages: errors.map(e => e.msg) });
 
-  const { client, lead, team, domain, ga_account, ga_viewName, ga_viewNum, kpis, services, password, pagespeedSheet, seoName, socialName, adwordsName } = req.body;
+  const { client, lead, team, domain, ga_account, ga_viewName, ga_viewNum, kpis, services, password, pagespeedSheetId, facebookId } = req.body;
 
   const params = {
     name: client,
     lead,
-    team: team || [],
+    team,
     gaAccount: ga_account,
     gaViewName: ga_viewName,
     gaViewNum: ga_viewNum,
     domain,
-    kpis: kpis || [],
-    services: services || [],
-    summaryMetrics: summaryMetrics || [],
-    pageSpeedSheetId,
-    password: password ? hashPassword(password) : null,
-    departmentDetails: {
-      seo: {
-        name: seoName,
-        pageSpeedSheetId: pagespeedSheet
-      },
-      social: {
-        name: socialName
-      },
-      paidSearch: {
-        name: adwordsName
-      }
-    }
+    kpis,
+    services,
+    password: password ? hashPassword(password) : undefined,
+    pagespeedSheetId,
+    facebookId
   };
-  for (const prop in params.departmentDetails) {
-    if (!params.departmentDetails[prop].name) delete params.departmentDetails[prop].name;
-  }
-  if (!params.departmentDetails.seo.pageSpeedSheetId) delete params.departmentDetails.seo.pageSpeedSheetId;
   for (const prop in params) {
     if (!params[prop]) delete params[prop];
   }
