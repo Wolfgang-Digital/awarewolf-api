@@ -4,7 +4,6 @@ import commentController from './commentController';
 import surveyController from './surveyController';
 import watsonController from './watsonController';
 import trendsController from './trendsController';
-import analyticsController from './analyticsController';
 import clientController from './clientController';
 
 export {
@@ -14,6 +13,5 @@ export {
 	surveyController,
 	watsonController,
 	trendsController,
-	analyticsController,
 	clientController
 };

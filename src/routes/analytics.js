@@ -1,12 +1,8 @@
 import { Router } from 'express';
 
-import { analyticsController, clientController } from '../controllers';
+import { clientController } from '../controllers';
 
 const router = Router();
-
-// Data routes
-router.get('/sheet/:dept/:range', analyticsController.getDataFromSheet);
-router.get('/data', analyticsController.getGADataWithDates);
 
 // Client routes
 router.get('/clients', clientController.getClients);

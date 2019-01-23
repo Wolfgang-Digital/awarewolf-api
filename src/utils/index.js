@@ -1,8 +1,8 @@
 import { signJwt, verifyJwt, comparePasswords, hashPassword } from './auth';
 import upload, { fileErrorHandler } from './fileUpload';
-import * as transform from './transform';
-import * as constants from './constants';
-import { addClient } from './supermetrics';
+import transform from './transform';
+import updateQueries from './spreadsheetWrite';
+import getClientData from './spreadsheetRead';
 
 export {
 	signJwt,
@@ -12,6 +12,6 @@ export {
 	upload,
 	fileErrorHandler,
 	transform,
-	constants,
-	addClient
+	updateQueries,
+	getClientData
 };

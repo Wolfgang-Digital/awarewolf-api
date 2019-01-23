@@ -21,7 +21,9 @@ const clientSchema = new Schema({
   lead: [{  type: String, required: true, trim: true }],
   team: [{ type: String, required: true, trim: true }],
   pagespeedSheetId: { type: String, trim: true },
-  facebookId: { type: String, trim: true }
+  facebookId: { type: String, trim: true },
+  awAccountName: { type: String, trim: true },
+  awViewNum: { type: Number, required: true }
 });
 
 export default mongoose.model('Client', clientSchema);

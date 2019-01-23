@@ -1,44 +1,69 @@
 import db from '../models';
-import { hashPassword, addClient } from '../utils';
+import { hashPassword, updateQueries, getClientData, transform } from '../utils';
 
 const clientController = {};
 
 clientController.addClient = async (req, res) => {
   req.check('client', 'Client name cannot be blank').notEmpty();
   req.check('lead', 'Client lead cannot be blank').notEmpty();
-  req.check('ga_account', 'GA Account must be a valid email').isEmail();
-  req.check('ga_viewName', 'View name cannot be blank').notEmpty();
-  req.check('ga_viewNum', 'View number must be a valid integer').isInt();
+  req.check('gaAccount', 'Must be a valid Wolfgang GA account').isIn([
+    'analytics@wolfgangdigital.com',
+    'ga@wolfgangdigital.com',
+    'ga.wolfgang@wolfgangdigital.com',
+    'g_analytics@wolfgangdigital.com',
+    'ga5@wolfgangdigital.com'
+  ]);
+  req.check('gaViewName', 'View name cannot be blank').notEmpty();
+  req.check('gaViewNum', 'View number must be a valid integer').isInt();
+
+  const { client, lead, team, domain, gaAccount, gaViewName, gaViewNum, kpis, services, pagespeedSheetId, facebookId, awAccountName, awViewNum } = req.body;
+
+  if (services.includes('SEO')) {
+    req.check('domain', 'Domain must be a valid URL').isURL();
+  }
+
+  if (services.includes('Social')) {
+    req.check('facebookId', 'Facebook ID cannot be blank').notEmpty();
+  }
+
+  if (services.includes('Paid Search')) {
+    req.check('awAccountName', 'Adwords account name cannot be blank').notEmpty();
+    req.check('awViewNum', 'Adwords view number must be a valid integer').isInt();
+  }
 
   const errors = req.validationErrors();
   if (errors) return res.status(400).json({ messages: errors.map(e => e.msg) });
 
+  const newClient = new db.Client({
+    name: client,
+    lead,
+    team,
+    gaAccount,
+    gaViewName,
+    gaViewNum,
+    domain,
+    kpis,
+    services,
+    pagespeedSheetId,
+    facebookId,
+    awAccountName,
+    awViewNum
+  });
+
   try {
-    const { client, lead, team, domain, ga_account, ga_viewName, ga_viewNum, kpis, services, pagespeedSheetId, facebookId } = req.body;
-
-    const newClient = new db.Client({
-      name: client,
-      lead,
-      team,
-      gaAccount: ga_account,
-      gaViewName: ga_viewName,
-      gaViewNum: ga_viewNum,
-      domain,
-      kpis,
-      services,
-      pagespeedSheetId,
-      facebookId
-    });
-
-    await newClient.save();
-    await addClient(newClient);
+    await Promise.all([newClient.save(), updateQueries('ADD', newClient)]);
 
     res.status(200).json({
       success: true,
       data: newClient
     });
   } catch (err) {
-    const errMsg = err.toString().indexOf('duplicate key error') > -1 ? 'Client already exists in database' : err.toString();
+    let errMsg = err.toString();
+    if (errMsg.indexOf('duplicate key error') > -1) {
+      errMsg = `Client '${client}' already exists`;
+    } else {
+      await db.Client.findOneAndDelete({ name: client });
+    }
     res.status(400).json({ messages: [errMsg] });
   }
 };
@@ -46,12 +71,19 @@ clientController.addClient = async (req, res) => {
 clientController.getClients = async (req, res) => {
   try {
     const clients = await db.Client.find({}).select('-password');
+    const raw = await getClientData();
+    const data = transform(clients, raw);
+
     res.status(200).json({
       success: true,
-      data: clients
-    })
+      data
+    });
   } catch (err) {
-    res.status(400).json({ messages: [err.toString()] });
+    let errMsg = err.toString();
+    if (errMsg.indexOf('find of undefined')) {
+      errMsg = 'No data found';
+    }
+    res.status(400).json({ messages: [errMsg] });
   }
 };
 
@@ -61,21 +93,23 @@ clientController.updateClient = async (req, res) => {
   const errors = req.validationErrors();
   if (errors) return res.status(400).json({ messages: errors.map(e => e.msg) });
 
-  const { client, lead, team, domain, ga_account, ga_viewName, ga_viewNum, kpis, services, password, pagespeedSheetId, facebookId } = req.body;
+  const { client, lead, team, domain, gaAccount, gaViewName, gaViewNum, kpis, services, password, pagespeedSheetId, facebookId, awAccountName, awViewNum  } = req.body;
 
   const params = {
     name: client,
     lead,
     team,
-    gaAccount: ga_account,
-    gaViewName: ga_viewName,
-    gaViewNum: ga_viewNum,
+    gaAccount,
+    gaViewName,
+    gaViewNum,
     domain,
     kpis,
     services,
     password: password ? hashPassword(password) : undefined,
     pagespeedSheetId,
-    facebookId
+    facebookId,
+    awAccountName,
+    awViewNum
   };
   for (const prop in params) {
     if (!params[prop]) delete params[prop];
@@ -93,3 +127,4 @@ clientController.updateClient = async (req, res) => {
 };
 
 export default clientController;
+
