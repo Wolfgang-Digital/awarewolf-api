@@ -3,11 +3,7 @@ export const ADWORDS_SHEET_ID = '18qoARQV0AriYHnMtaBBqvHE4y25o4_kQ3YZRS1Eax3Q';
 export const SEO_SHEET_ID = '1PZdcrH_q5DMe_UU5IiFb-vcHqU1C6OabRr5Wkd7RB88';
 export const SOCIAL_SHEET_ID = '1IVFZqCAxA9lzpmEYscQxuUbE7sdV2eK_hTKaiy6SL6Y';
 
-export const DATES = [
-  'LastMonth_MoM',
-  'LastMonth_YoY',
-  'YearToDate_YoY'
-];
+export const DATES = ['LastMonth_MoM', 'LastMonth_YoY', 'YearToDate_YoY'];
 
 export const MONTHS = [
   'January',
@@ -43,25 +39,35 @@ export const INDICES = [
 ];
 
 export const ADWORDS_QUERIES = [
+  'GA_30Days_MoM',
+  'GA_30Days_YoY',
   'GA_LastMonth_MoM',
   'GA_LastMonth_YoY',
   'GA_YearToDate_YoY',
+  'AW_30Days_MoM',
+  'AW_30Days_YoY',
   'AW_LastMonth_MoM',
   'AW_LastMonth_YoY',
   'AW_YearToDate_YoY'
 ];
 
 export const SEO_QURIES = [
+  'GA_30Days_MoM',
+  'GA_30Days_YoY',
   'GA_LastMonth_MoM',
   'GA_LastMonth_YoY',
-  'GA_YearToDate_YoY',
+  'GA_YearToDate_YoY'
 ];
 
 export const SOCIAL_QUERIES = [
+  'GA_30Days_MoM',
+  'GA_30Days_YoY',
   'GA_LastMonth_MoM',
   'GA_LastMonth_YoY',
   'GA_YearToDate_YoY',
+  'FB_30Days_MoM',
+  'FB_30Days_YoY',
   'FB_LastMonth_MoM',
   'FB_LastMonth_YoY',
-  'FB_YearToDate_YoY',
+  'FB_YearToDate_YoY'
 ];

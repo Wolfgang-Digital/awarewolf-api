@@ -6,17 +6,33 @@ const clientController = {};
 clientController.addClient = async (req, res) => {
   req.check('client', 'Client name cannot be blank').notEmpty();
   req.check('lead', 'Client lead cannot be blank').notEmpty();
-  req.check('gaAccount', 'Must be a valid Wolfgang GA account').isIn([
-    'analytics@wolfgangdigital.com',
-    'ga@wolfgangdigital.com',
-    'ga.wolfgang@wolfgangdigital.com',
-    'g_analytics@wolfgangdigital.com',
-    'ga5@wolfgangdigital.com'
-  ]);
+  req
+    .check('gaAccount', 'Must be a valid Wolfgang GA account')
+    .isIn([
+      'analytics@wolfgangdigital.com',
+      'ga@wolfgangdigital.com',
+      'ga.wolfgang@wolfgangdigital.com',
+      'g_analytics@wolfgangdigital.com',
+      'ga5@wolfgangdigital.com'
+    ]);
   req.check('gaViewName', 'View name cannot be blank').notEmpty();
   req.check('gaViewNum', 'View number must be a valid integer').isInt();
 
-  const { client, lead, team, domain, gaAccount, gaViewName, gaViewNum, kpis, services, pagespeedSheetId, facebookId, awAccountName, awViewNum } = req.body;
+  const {
+    client,
+    lead,
+    team,
+    domain,
+    gaAccount,
+    gaViewName,
+    gaViewNum,
+    kpis,
+    services,
+    pagespeedSheetId,
+    facebookId,
+    awAccountName,
+    awViewNum
+  } = req.body;
 
   if (services.includes('SEO')) {
     req.check('domain', 'Domain must be a valid URL').isURL();
@@ -79,6 +95,7 @@ clientController.getClients = async (req, res) => {
       data
     });
   } catch (err) {
+    console.error(err);
     let errMsg = err.toString();
     if (errMsg.indexOf('find of undefined')) {
       errMsg = 'No data found';
@@ -93,7 +110,22 @@ clientController.updateClient = async (req, res) => {
   const errors = req.validationErrors();
   if (errors) return res.status(400).json({ messages: errors.map(e => e.msg) });
 
-  const { client, lead, team, domain, gaAccount, gaViewName, gaViewNum, kpis, services, password, pagespeedSheetId, facebookId, awAccountName, awViewNum  } = req.body;
+  const {
+    client,
+    lead,
+    team,
+    domain,
+    gaAccount,
+    gaViewName,
+    gaViewNum,
+    kpis,
+    services,
+    password,
+    pagespeedSheetId,
+    facebookId,
+    awAccountName,
+    awViewNum
+  } = req.body;
 
   const params = {
     name: client,
@@ -127,4 +159,3 @@ clientController.updateClient = async (req, res) => {
 };
 
 export default clientController;
-
