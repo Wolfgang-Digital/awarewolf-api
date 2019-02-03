@@ -15,7 +15,7 @@ import { verifyJwt } from './utils';
 const app = express();
 
 const PORT = process.env.PORT || 3001;
-const DB_URI = 'mongodb://admin:W0lfgang911*@ds115442.mlab.com:15442/wolfgang-feedback';
+const DB_URI = process.env.DB_URI;
 
 // Middleware.
 app.use(bodyParser.urlencoded({ extended: false }));
