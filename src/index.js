@@ -7,13 +7,15 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import validator from 'express-validator';
 import compression from 'compression';
-import { auth, awarewolf, user, watson, analytics } from './routes';
+import { auth, awarewolf, user, analytics } from './routes';
+import bigQuery from './features/bigQuery/routes';
+import clients from './features/clients/routes';
 import { verifyJwt } from './utils';
 
 const app = express();
 
 const PORT = process.env.PORT || 3001;
-const DB_URI = process.env.NODE_ENV === 'production' ? process.env.DB_URI : process.env.TEST_DB_URI;
+const DB_URI = 'mongodb://admin:W0lfgang911*@ds115442.mlab.com:15442/wolfgang-feedback';
 
 // Middleware.
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -29,7 +31,8 @@ app.get('/', (req, res) => res.send('Ok'));
 
 // Public routes.
 app.use('/auth', auth);
-app.use('/watson', watson);
+app.use('/bigquery', bigQuery);
+app.use('/clients', clients);
 
 // Private routes.
 app.use('/api', verifyJwt, awarewolf);
@@ -37,12 +40,12 @@ app.use('/user', verifyJwt, user);
 app.use('/analytics', verifyJwt, analytics);
 
 app.listen(PORT, () => {
-  if (process.env.NODE_ENV === 'development') console.log(`Running on ${PORT}`)
+  if (process.env.NODE_ENV !== 'production') console.log(`Running on ${PORT}`)
 });
 
 // MongoDB configuration.
 mongoose.connect(DB_URI, { useNewUrlParser: true }, () => {
-  if (process.env.NODE_ENV === 'development') console.log('Connected to MongoDB');
+  if (process.env.NODE_ENV !== 'production') console.log('Connected to MongoDB');
 });
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));

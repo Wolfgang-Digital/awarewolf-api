@@ -26,4 +26,4 @@ const clientSchema = new Schema({
   awViewNum: { type: Number, required: true }
 });
 
-export default mongoose.model('Client', clientSchema);
+export default mongoose.model('Client_Old', clientSchema);
