@@ -34,8 +34,13 @@ bower_components
 # Compiled binary addons (https://nodejs.org/api/addons.html)
 build/Release
 
-
 build/
+
+# Onld and unused files
+unused/
+
+# Google credentials
+credentials.json
 
 # Dependency directories
 node_modules/

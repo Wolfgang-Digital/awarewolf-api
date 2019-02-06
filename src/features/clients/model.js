@@ -12,13 +12,13 @@ const clientSchema = new Schema({
     trim: true,
     minLength: [8, 'Password must be at least 8 characters long.']
   },
-  services: [{ type: String, trim: true }],
+  services: [{ type: String, trim: true, required: true }],
   _leads: [{ type: Schema.ObjectId, ref: 'User', required: true }],
   _team: [{ type: Schema.ObjectId, ref: 'User', required: true }],
-  fbAdsName: [{ type: String, trim: true }],
+  fbAdsName: { type: String, trim: true },
   fbAdsId: { type: String, trim: true },
   googleAdsName: { type: String, trim: true },
-  googleAdsNumber: { type: Number, required: true }
+  googleAdsNumber: { type: Number }
 });
 
 export default mongoose.model('Client', clientSchema);

@@ -3,6 +3,6 @@ import * as controller from './controller';
 
 const router = Router();
 
-router.get('/summary/organic/:id', controller.getClientSummary);
+router.get('/summary/:id', controller.getClientSummary);
 
 export default router;

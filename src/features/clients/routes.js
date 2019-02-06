@@ -4,7 +4,9 @@ import * as validator from './validator';
 
 const router = Router();
 
-router.get('/clients', controller.getClients);
-router.post('/clients', validator.createClient, controller.createClient);
+router.get('/', controller.getClients);
+router.get('/:id', controller.getClientById);
+router.post('/', validator.createClient, controller.createClient);
+router.patch('/:id', validator.updateClient, controller.updateClient);
 
 export default router;
