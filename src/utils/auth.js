@@ -23,7 +23,6 @@ const verifyJwt = (req, res, next) => {
         next();
       })
       .catch(err => {
-        console.log('Error: ', err);
         return res.status(400).json({ message: 'Unable to locate user.' });
       });
   });
@@ -33,9 +32,4 @@ const comparePasswords = (a, b) => bcrypt.compareSync(a, b);
 
 const hashPassword = password => bcrypt.hashSync(password, SALT_ROUNDS);
 
-export {
-  signJwt,
-  verifyJwt,
-  comparePasswords,
-  hashPassword
-};
+export { signJwt, verifyJwt, comparePasswords, hashPassword };

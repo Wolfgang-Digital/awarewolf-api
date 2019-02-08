@@ -8,7 +8,7 @@ import cors from 'cors';
 import validator from 'express-validator';
 import compression from 'compression';
 import { auth, awarewolf, user } from './routes';
-import bigQuery from './features/analytics/routes';
+import analytics from './features/analytics/routes';
 import clients from './features/clients/routes';
 import { verifyJwt } from './utils';
 
@@ -25,12 +25,9 @@ app.use(compression());
 
 if (process.env.NODE_ENV !== 'production') app.use(logger('dev'));
 
-// Start Heroku mount.
-app.get('/', (req, res) => res.send('Ok'));
-
 // Public routes.
 app.use('/auth', auth);
-app.use('/analytics', bigQuery);
+app.use('/analytics', analytics);
 app.use('/clients', clients);
 
 // Private routes.

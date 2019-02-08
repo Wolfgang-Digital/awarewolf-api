@@ -1,5 +1,5 @@
 import { google } from 'googleapis';
-import { SPREADSHEET_ID, GA_MAPPINGS } from './constants';
+import constants from './constants';
 
 const api = google.sheets('v4');
 
@@ -18,7 +18,7 @@ const updateSheet = async ({ range, values }) => {
   const auth = await getAuth();
   return api.spreadsheets.values.update({
     auth,
-    spreadsheetId: SPREADSHEET_ID,
+    spreadsheetId: constants.spreadsheet_id,
     range,
     valueInputOption: 'USER_ENTERED',
     requestBody: {
@@ -39,7 +39,7 @@ export const generateQueries = async client => {
   const auth = await getAuth();
   const queries = await api.spreadsheets.values.get({
     auth,
-    spreadsheetId: SPREADSHEET_ID,
+    spreadsheetId: constants.spreadsheet_id,
     range: 'SupermetricsQueries!A21:AV37',
     majorDimension: 'ROWS'
   });
@@ -47,12 +47,12 @@ export const generateQueries = async client => {
 
   // Organic Search
   if (client.services.includes('SEO')) {
-    const accounts = JSON.parse(queries.data.values[GA_MAPPINGS.organic[client.gaAccount]][22]);
+    const accounts = JSON.parse(queries.data.values[constants.ga_mappings.organic[client.gaAccount]][22]);
     if (!accounts.includes(`${client.gaViewNumber}\`${client.gaViewName}`)) {
       accounts.push(`${client.gaViewNumber}\`${client.gaViewName}`);
     }
     const res = await updateSheet({
-      range: `SupermetricsQueries!W${GA_MAPPINGS.organic[client.gaAccount] + 21}`,
+      range: `SupermetricsQueries!W${constants.ga_mappings.organic[client.gaAccount] + 21}`,
       values: [[JSON.stringify(accounts)]]
     });
     if (res.status !== 200) {
@@ -62,12 +62,12 @@ export const generateQueries = async client => {
 
   // Social
   if (client.services.includes('Social')) {
-    const gaAccounts = JSON.parse(queries.data.values[GA_MAPPINGS.social[client.gaAccount]][22]);
+    const gaAccounts = JSON.parse(queries.data.values[constants.ga_mappings.social[client.gaAccount]][22]);
     if (!gaAccounts.includes(`${client.gaViewNumber}\`${client.gaViewName}`)) {
       gaAccounts.push(`${client.gaViewNumber}\`${client.gaViewName}`);
     }
     const gaRes = await updateSheet({
-      range: `SupermetricsQueries!W${GA_MAPPINGS.social[client.gaAccount] + 21}`,
+      range: `SupermetricsQueries!W${constants.ga_mappings.social[client.gaAccount] + 21}`,
       values: [[JSON.stringify(gaAccounts)]]
     });
 
@@ -87,12 +87,12 @@ export const generateQueries = async client => {
 
   // Paid Search
   if (client.services.includes('Paid Search')) {
-    const gaAccounts = JSON.parse(queries.data.values[GA_MAPPINGS.paidSearch[client.gaAccount]][22]);
+    const gaAccounts = JSON.parse(queries.data.values[constants.ga_mappings.paidSearch[client.gaAccount]][22]);
     if (!gaAccounts.includes(`${client.gaViewNumber}\`${client.gaViewName}`)) {
       gaAccounts.push(`${client.gaViewNumber}\`${client.gaViewName}`);
     }
     const gaRes = await updateSheet({
-      range: `SupermetricsQueries!W${GA_MAPPINGS.paidSearch[client.gaAccount] + 21}`,
+      range: `SupermetricsQueries!W${constants.ga_mappings.paidSearch[client.gaAccount] + 21}`,
       values: [[JSON.stringify(gaAccounts)]]
     });
 
@@ -117,7 +117,7 @@ export const addToClientList = async client => {
   const auth = await getAuth();
   const res = await api.spreadsheets.values.append({
     auth,
-    spreadsheetId: SPREADSHEET_ID,
+    spreadsheetId: constants.spreadsheet_id,
     range: `Clients!A1`,
     valueInputOption: `USER_ENTERED`,
     requestBody: {

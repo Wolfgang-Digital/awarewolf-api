@@ -24,6 +24,10 @@
     "no-underscore-dangle": "off",
     "import/prefer-default-export": "off",
     "array-bracket-spacing": "off",
-    "import/first": "off"
+    "import/first": "off",
+    "arrow-body-style": "off",
+    "no-prototype-builtins": "off",
+    "no-restricted-syntax": "off",
+    "no-useless-escape": "off"
   }
 }

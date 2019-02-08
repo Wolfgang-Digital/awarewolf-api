@@ -1,8 +1,8 @@
-import db from '../models';
-import { comparePasswords, signJwt, hashPassword } from '../utils';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import cloudinary from 'cloudinary';
+import { comparePasswords, signJwt, hashPassword } from '../utils';
+import db from '../models';
 
 const userController = {};
 
@@ -27,10 +27,13 @@ const sendConfirmationEmail = async (user, req, res) => {
     from: 'no-reply@awarewolf.com',
     to: user.email,
     subject: 'Awarewolf Account Verification',
-    text: `Hi ${capitaliseWord(user.username)},\n\n` +
-          `Please verify your email by clicking the following link: \nhttp:\/\/${req.headers.host}\/auth\/confirm\/${token.token}.\n`
+    text:
+      `Hi ${capitaliseWord(user.username)},\n\n`
+      + `Please verify your email by clicking the following link: \nhttp:\/\/${req.headers.host}\/auth\/confirm\/${
+        token.token
+      }.\n`
   };
-  transporter.sendMail(mailOptions, (err) => {
+  transporter.sendMail(mailOptions, err => {
     if (err) {
       return res.status(500).json({ messages: ['Error sending verification email.'] });
     }
@@ -51,7 +54,7 @@ userController.login = async (req, res) => {
   try {
     const user = await db.User.findOne({ email: req.body.email });
     if (!user) return res.status(401).json({ messages: ['Email address not found.'] });
-    
+
     if (!comparePasswords(req.body.password, user.password)) return res.status(401).json({ messages: 'Invalid password.' });
 
     if (!user.isVerified) return res.status(401).json({ messages: ['Account has not been verified.'] });
@@ -90,16 +93,18 @@ userController.create = async (req, res) => {
       return res.status(401).json({ messages: ['Must be a valid Wolfgang email.'] });
     }
 
-    const username = req.body.email.split('@')[0].replace('_', ' ').replace('.', ' ');
+    const username = req.body.email
+      .split('@')[0]
+      .replace('_', ' ')
+      .replace('.', ' ');
     user = new db.User({
       username,
       password: req.body.password,
       email: req.body.email
     });
     await user.save();
-    
+
     await sendConfirmationEmail(user, req, res);
-    
   } catch (err) {
     res.status(500).json({ messages: ['Database error.'] });
   }
@@ -116,9 +121,8 @@ userController.confirmEmail = async (req, res) => {
 
     if (user.isVerified) return res.status(400).send('User already verified.');
 
-    await user.update({ $set: { 'isVerified': true }});
+    await user.update({ $set: { isVerified: true } });
     res.status(200).send('Your account has been verified. You may log in now.');
-
   } catch (err) {
     res.status(500).send('Error locating user or token.');
   }
@@ -141,7 +145,6 @@ userController.resendToken = async (req, res) => {
     if (user.isVerified) return res.status(400).json({ messages: ['This account has already been verfied.'] });
 
     await sendConfirmationEmail(user, req, res);
-
   } catch (err) {
     res.status(500).json({ messages: ['Error locating user or token.'] });
   }
@@ -158,31 +161,35 @@ userController.upload = async (req, res) => {
       api_key: process.env.CLOUDINARY_KEY,
       api_secret: process.env.CLOUDINARY_SECRET
     });
-    cloudinary.v2.uploader.upload_stream({
-      public_id: `Awarewolf/${user._id}`,
-      use_filename: true, 
-      resource_type: 'raw',
-    }, async (err, result) => {
-      if (err) res.status(500).json({ messages: ['Error uploading file.'] });
+    cloudinary.v2.uploader
+      .upload_stream(
+        {
+          public_id: `Awarewolf/${user._id}`,
+          use_filename: true,
+          resource_type: 'raw'
+        },
+        async (err, result) => {
+          if (err) res.status(500).json({ messages: ['Error uploading file.'] });
 
-      const updatedUser = await db.User.findByIdAndUpdate(
-        user._id,
-        { $set: { 'avatar': result.secure_url } },
-        { new: true }
-      );
+          const updatedUser = await db.User.findByIdAndUpdate(
+            user._id,
+            { $set: { avatar: result.secure_url } },
+            { new: true }
+          );
 
-      res.status(200).json({
-        success: true,
-        data: {
-          username: updatedUser.username,
-          id: updatedUser._id,
-          token: signJwt(updatedUser),
-          avatar: updatedUser.avatar,
-          roles: updatedUser.roles
+          res.status(200).json({
+            success: true,
+            data: {
+              username: updatedUser.username,
+              id: updatedUser._id,
+              token: signJwt(updatedUser),
+              avatar: updatedUser.avatar,
+              roles: updatedUser.roles
+            }
+          });
         }
-      });
-    })
-    .end(file.buffer);
+      )
+      .end(file.buffer);
   } catch (err) {
     console.log(err.toString());
     return res.status(500).json({ messages: ['Error uploading image.'] });
@@ -191,7 +198,7 @@ userController.upload = async (req, res) => {
 
 userController.removeAvatar = async (req, res) => {
   try {
-    await req.user.update({ $set: { 'avatar': '' } });
+    await req.user.update({ $set: { avatar: '' } });
 
     const updatedUser = await db.User.findById(req.user._id);
 
@@ -205,7 +212,6 @@ userController.removeAvatar = async (req, res) => {
         roles: updatedUser.roles
       }
     });
-
   } catch (err) {
     res.status(400).json({ messages: ['Error removing image.'] });
   }
@@ -236,14 +242,17 @@ userController.resetPassword = async (req, res) => {
   try {
     const resetToken = crypto.randomBytes(16).toString('hex');
 
-    const user = await db.User.findOneAndUpdate({
-      'email': decodeURIComponent(req.params.email)
-    }, {
-      $set: { 
-        'passwordResetToken': resetToken,
-        'passwordResetExpires': Date.now() + 86400000
+    const user = await db.User.findOneAndUpdate(
+      {
+        email: decodeURIComponent(req.params.email)
+      },
+      {
+        $set: {
+          passwordResetToken: resetToken,
+          passwordResetExpires: Date.now() + 86400000
+        }
       }
-    });
+    );
 
     const transporter = nodemailer.createTransport({
       service: 'Sendgrid',
@@ -256,18 +265,18 @@ userController.resetPassword = async (req, res) => {
       from: 'no-reply@awarewolf.com',
       to: user.email,
       subject: 'Awarewolf Password Reset',
-      text: `Hi ${capitaliseWord(user.username)},\n\n` +
-            `To reset your password click following link: \nhttps:\/\/awarewolf.netlify.com\/reset-password\/${resetToken}.\n\n` +
-            `This link will expire in 24 hours.`
+      text:
+        `Hi ${capitaliseWord(user.username)},\n\n`
+        + `To reset your password click following link: \nhttps:\/\/awarewolf.netlify.com\/reset-password\/${resetToken}.\n\n`
+        + `This link will expire in 24 hours.`
     };
-    transporter.sendMail(mailOptions, (err) => {
+    transporter.sendMail(mailOptions, err => {
       if (err) {
         return res.status(500).json({ messages: ['Error sending password reset email.'] });
       }
       return res.status(200).json({ success: true, data: `Password reset email sent.` });
     });
   } catch (err) {
-    console.log(error);
     res.status(400).json({ messages: [err.toString()] });
   }
 };
@@ -277,20 +286,23 @@ userController.confirmReset = async (req, res) => {
     const { resetToken, password } = req.body.data;
 
     if (!resetToken || !password) return res.status(400).json({ messages: ['Missing password or token.'] });
-   
-    const user = await db.User.findOneAndUpdate({
-      'passwordResetToken': resetToken,
-      'passwordResetExpires': {
-        $gt: Date.now()
+
+    const user = await db.User.findOneAndUpdate(
+      {
+        passwordResetToken: resetToken,
+        passwordResetExpires: {
+          $gt: Date.now()
+        }
+      },
+      {
+        $set: {
+          password: hashPassword(password),
+          passwordResetToken: '',
+          passwordResetExpires: null
+        }
       }
-    },{
-      $set: {
-        'password': hashPassword(password),
-        'passwordResetToken': '',
-        'passwordResetExpires': null
-      }
-    })
-    
+    );
+
     if (user) {
       res.status(200).json({
         success: true,
@@ -305,9 +317,8 @@ userController.confirmReset = async (req, res) => {
     } else {
       res.status(400).json({ messages: ['Invalid or expired token.'] });
     }
-
-  } catch(err) {
-    res.status(400).json({ messages: ['User not found.'] })
+  } catch (err) {
+    res.status(400).json({ messages: ['User not found.'] });
   }
 };
 
@@ -323,7 +334,13 @@ userController.getUserPreferences = async (req, res) => {
     if (!preferences) {
       preferences = new db.Preferences({
         _user: req.params.userId,
-        metrics: ['Sessions', 'ROAS', 'Conversions', 'Conversion Rate', 'Revenue']
+        metrics: {
+          gaOrganic: ['Sessions'],
+          gaSocial: [],
+          gaPaid: [],
+          fbAds: ['Website Purchases'],
+          googleAds: []
+        }
       });
     }
     await preferences.save();
@@ -343,20 +360,15 @@ userController.updateUserPreferences = async (req, res) => {
   const errors = req.validationErrors();
   if (errors) return res.status(400).json({ messages: errors.map(e => e.msg) });
 
-  let params = {
-    metrics: req.body.metrics,
-    services: req.body.services
+  const params = {
+    metrics: req.body.metrics
   };
   for (const prop in params) {
     if (!params[prop]) delete params[prop];
   }
 
   try {
-    const preferences = await db.Preferences.findOneAndUpdate(
-      { _user: req.params.userId },
-      params,
-      { new: true }
-    );
+    const preferences = await db.Preferences.findOneAndUpdate({ _user: req.params.userId }, params, { new: true });
 
     res.status(200).json({
       success: true,
