@@ -2,7 +2,13 @@
   "valid_metrics": {
     "ga_organic": ["sessions", "bounces", "new_users", "total_conversions", "transaction_revenue"],
     "ga_social": ["sessions", "transaction_revenue"],
-    "ga_paid": ["sessions", "goal_completions", "goal_conversion_rate", "transactions", "ecommerce_conversion_rate"],
+    "ga_paid": [
+      "sessions",
+      "goal_completions",
+      "goal_conversion_rate",
+      "transactions",
+      "ecommerce_conversion_rate"
+    ],
     "fb_ads": [
       "website_purchases",
       "cost_per_website_purchase",

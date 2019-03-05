@@ -29,9 +29,9 @@ const sendConfirmationEmail = async (user, req, res) => {
     subject: 'Awarewolf Account Verification',
     text:
       `Hi ${capitaliseWord(user.username)},\n\n`
-      + `Please verify your email by clicking the following link: \nhttp:\/\/${req.headers.host}\/auth\/confirm\/${
-        token.token
-      }.\n`
+      + `Please verify your email by clicking the following link: \nhttp:\/\/${
+        req.headers.host
+      }\/auth\/confirm\/${token.token}.\n`
   };
   transporter.sendMail(mailOptions, err => {
     if (err) {
@@ -334,13 +334,13 @@ userController.getUserPreferences = async (req, res) => {
     if (!preferences) {
       preferences = new db.Preferences({
         _user: req.params.userId,
-        metrics: {
-          gaOrganic: ['Sessions'],
-          gaSocial: [],
-          gaPaid: [],
-          fbAds: ['Website Purchases'],
-          googleAds: []
-        }
+        metrics: [
+          { name: 'sessions', channel: 'organic', source: 'google analytics' },
+          { name: 'sessions', channel: 'social', source: 'google analytics' },
+          { name: 'website_conversion_rate', channel: 'social', source: 'facebook' },
+          { name: 'goal_conversion_rate', channel: 'paid search', source: 'google analytics' },
+          { name: 'clicks', network: 'display', channel: 'paid search', source: 'google ads' }
+        ]
       });
     }
     await preferences.save();
@@ -368,7 +368,11 @@ userController.updateUserPreferences = async (req, res) => {
   }
 
   try {
-    const preferences = await db.Preferences.findOneAndUpdate({ _user: req.params.userId }, params, { new: true });
+    const preferences = await db.Preferences.findOneAndUpdate(
+      { _user: req.params.userId },
+      params,
+      { new: true }
+    );
 
     res.status(200).json({
       success: true,

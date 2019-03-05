@@ -27,20 +27,24 @@ if (process.env.NODE_ENV !== 'production') app.use(logger('dev'));
 
 // Public routes.
 app.use('/auth', auth);
-app.use('/analytics', analytics);
-app.use('/clients', clients);
 
 // Private routes.
 app.use('/api', verifyJwt, awarewolf);
 app.use('/user', verifyJwt, user);
+app.use('/analytics', verifyJwt, analytics);
+app.use('/clients', verifyJwt, clients);
 
 app.listen(PORT, () => {
   if (process.env.NODE_ENV !== 'production') console.log(`Running on ${PORT}`);
 });
 
 // MongoDB configuration.
-mongoose.connect(process.env.DB_URI, { useNewUrlParser: true, useCreateIndex: true, useFindAndModify: false }, () => {
-  if (process.env.NODE_ENV !== 'production') console.log('Connected to MongoDB');
-});
+mongoose.connect(
+  process.env.DB_URI,
+  { useNewUrlParser: true, useCreateIndex: true, useFindAndModify: false },
+  () => {
+    if (process.env.NODE_ENV !== 'production') console.log('Connected to MongoDB');
+  }
+);
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
