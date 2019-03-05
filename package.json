@@ -3,13 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "heroku-run-build-script": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./build/index.js",
+    "start": "npm run clean && npm babel -d ./build ./src && node ./build/index.js",
     "start:dev": "cd src && nodemon index.js --exec babel-node --presets env",
-    "clean": "rm -rf build && mkdir build",
-    "build": "npm run clean && babel -d ./build ./src"
+    "clean": "rm -rf build && mkdir build"
   },
   "keywords": [],
   "author": "",
