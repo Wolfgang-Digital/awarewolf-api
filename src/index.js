@@ -8,8 +8,6 @@ import cors from 'cors';
 import validator from 'express-validator';
 import compression from 'compression';
 import { auth, awarewolf, user } from './routes';
-import analytics from './features/analytics/routes';
-import clients from './features/clients/routes';
 import { verifyJwt } from './utils';
 
 const app = express();
@@ -31,8 +29,6 @@ app.use('/auth', auth);
 // Private routes.
 app.use('/api', verifyJwt, awarewolf);
 app.use('/user', verifyJwt, user);
-app.use('/analytics', verifyJwt, analytics);
-app.use('/clients', verifyJwt, clients);
 
 app.listen(PORT, () => {
   if (process.env.NODE_ENV !== 'production') console.log(`Running on ${PORT}`);
