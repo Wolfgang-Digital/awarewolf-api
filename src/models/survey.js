@@ -27,7 +27,8 @@ const surveySchema = new Schema({
     }
   }],
   userResponses: [{ type: Schema.Types.ObjectId, ref: 'User', required: true }],
-  answers: [{ type: Schema.Types.Mixed }]
+  answers: [{ type: Schema.Types.Mixed }],
+  visibleTo: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }]
 }, { timestamps: true });
 
 function populate(next) {

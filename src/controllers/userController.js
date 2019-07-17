@@ -218,10 +218,8 @@ userController.removeAvatar = async (req, res) => {
 };
 
 userController.getUsers = async (req, res) => {
-  if (!req.user.isAdmin) return res.status(403).json({ messages: ['Unauthorised access.'] });
-
   try {
-    const users = await db.User.find({}).select('-password');
+    const users = await db.User.find({}).select('-password -passwordResetToken -passwordResetExpires');
     res.status(200).json({
       success: true,
       data: users

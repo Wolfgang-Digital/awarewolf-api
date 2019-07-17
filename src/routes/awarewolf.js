@@ -1,10 +1,12 @@
 import { Router } from 'express';
 
-import { postController, commentController, surveyController } from '../controllers';
+import { postController, commentController, surveyController, userController } from '../controllers';
 
 const router = Router();
 
 router.get('/', (req, res) => res.status(200).send('Wolfgang Feedback App Beta'));
+
+router.get('/users', userController.getUsers);
 
 // Post routes.
 router.get('/posts', postController.fetch);

@@ -4,17 +4,30 @@ const surveyController = {};
 
 surveyController.fetch = async (req, res) => {
   try {
-    const surveys = await db.Survey.find({});
+    const surveys = await db.Survey.find({})
+      .populate('visibleTo', '_id');
+
     res.status(200).json({
       success: true,
-      data: surveys.map(n => Object.assign(n, { answers: [] }))
+      data: surveys.reduce((result, survey) => {
+        if (survey.visibleTo && survey.visibleTo.length > 0) {
+          const isVisible = survey.visibleTo.map(n => n._id.toString());
+          if (isVisible.indexOf(req.user.id) > -1) {
+            result.push(Object.assign(survey, { answers: [] }));
+            return result;
+          }
+          return result;
+        }
+        result.push(Object.assign(survey, { answers: [] }));
+        return result;
+      }, [])
     });
   } catch (err) {
     res.status(400).json({ messages: ['Error fetching surveys.'] });
   }
 };
 
-surveyController.findById = async(req, res) => {
+surveyController.findById = async (req, res) => {
   req.check('id', 'Error: Blank ID.').notEmpty();
 
   const errors = req.validationErrors();
@@ -33,7 +46,7 @@ surveyController.findById = async(req, res) => {
       data: survey
     });
   } catch (err) {
-    res.status(400).json({ messages: ['No matches found.'] })
+    res.status(400).json({ messages: ['No matches found.'] });
   }
 };
 
@@ -52,12 +65,13 @@ surveyController.create = async (req, res) => {
   });
 
   try {
-    const { title, description, questions } = req.body;
+    const { title, description, questions, visibleTo } = req.body;
     const survey = new db.Survey({
       _author: req.user._id,
       title,
       description,
-      questions
+      questions,
+      visibleTo
     });
     await survey.save();
     const updated = await db.Survey.findById(survey._id);
