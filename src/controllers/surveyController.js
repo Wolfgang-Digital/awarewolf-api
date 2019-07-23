@@ -4,9 +4,7 @@ const surveyController = {};
 
 surveyController.fetch = async (req, res) => {
   try {
-    console.log(JSON.stringify(req.user, null, 2));
-
-    if (!req.user.roles('manager')) {
+    if (!req.user.roles.includes('manager')) {
       return res.status(200).json({ success: true, data: [] });
     }
 
