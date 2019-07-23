@@ -44,6 +44,10 @@ surveyController.findById = async (req, res) => {
       survey.answers = [];
     }
 
+    if (survey.visibleTo.length > 0 && !survey.visibleTo.includes(req.user.id)) {
+      return res.status(404).json({ messages: ['Unauthorised'] });
+    }
+
     res.status(200).json({
       success: true,
       data: survey
