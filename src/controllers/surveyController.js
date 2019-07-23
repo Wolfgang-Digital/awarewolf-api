@@ -3,6 +3,12 @@ import db from '../models';
 const surveyController = {};
 
 surveyController.fetch = async (req, res) => {
+  console.log(JSON.stringify(req.user, null, 2));
+
+  if (!req.user.roles('manager')) {
+    return res.status(200).json({ success: true, data: [] });
+  }
+
   try {
     const surveys = await db.Survey.find({})
       .populate('visibleTo', '_id');
