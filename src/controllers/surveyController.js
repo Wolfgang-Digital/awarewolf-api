@@ -3,15 +3,14 @@ import db from '../models';
 const surveyController = {};
 
 surveyController.fetch = async (req, res) => {
-  console.log(JSON.stringify(req.user, null, 2));
-
-  if (!req.user.roles('manager')) {
-    return res.status(200).json({ success: true, data: [] });
-  }
-
   try {
-    const surveys = await db.Survey.find({})
-      .populate('visibleTo', '_id');
+    console.log(JSON.stringify(req.user, null, 2));
+
+    if (!req.user.roles('manager')) {
+      return res.status(200).json({ success: true, data: [] });
+    }
+
+    const surveys = await db.Survey.find({}).populate('visibleTo', '_id');
 
     res.status(200).json({
       success: true,
@@ -42,7 +41,7 @@ surveyController.findById = async (req, res) => {
   try {
     const survey = await db.Survey.findById(req.params.id);
 
-    if (!req.user.roles.includes('admin'))  {
+    if (!req.user.roles.includes('admin')) {
       survey.userResponses = [];
       survey.answers = [];
     }
@@ -61,9 +60,9 @@ surveyController.create = async (req, res) => {
 
   const errors = req.validationErrors();
   if (errors) return res.status(400).json({ messages: errors.map(e => e.msg) });
-  
+
   if (!req.body.questions || req.body.questions.length < 1) return res.status(400).json({ messages: ['Must be at least 1 question.'] });
-    
+
   req.body.questions.forEach(q => {
     if (q.type === 'multiple' && (!q.options || q.options.length < 2)) {
       return res.status(400).json({ messages: ['Must be at least 2 options.'] });
@@ -104,7 +103,7 @@ surveyController.submitResponse = async (req, res) => {
     const survey = await db.Survey.findById(req.params.id);
 
     if (survey.isResolved) return res.status(400).json({ messages: ['This survey has been resolved.'] });
-    
+
     if (survey.userResponses.filter(n => n.toString() === req.user._id.toString()).length > 0) {
       return res.status(400).json({ messages: ['Survey already completed.'] });
     }
