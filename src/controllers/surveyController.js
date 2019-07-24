@@ -6,6 +6,8 @@ surveyController.fetch = async (req, res) => {
   try {
     const surveys = await db.Survey.find({}).populate('visibleTo', '_id');
 
+    console.log(JSON.stringify(req, null, 2));
+
     res.status(200).json({
       success: true,
       data: surveys.reduce((result, survey) => {
