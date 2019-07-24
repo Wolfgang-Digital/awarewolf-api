@@ -6,22 +6,23 @@ surveyController.fetch = async (req, res) => {
   try {
     const surveys = await db.Survey.find({}).populate('visibleTo', '_id');
 
-    console.log(JSON.stringify(req, null, 2));
+    const data = req.hostname.includes('awarewolf') ? surveys.reduce((result, survey) => {
+      if (survey.visibleTo && survey.visibleTo.length > 0) {
+        const isVisible = survey.visibleTo.map(n => n._id.toString());
+        if (isVisible.indexOf(req.user.id) > -1) {
+          result.push(Object.assign(survey, { answers: [] }));
+          return result;
+        }
+        return result;
+      }
+      result.push(Object.assign(survey, { answers: [] }));
+      return result;
+    }, [])
+      : surveys;
 
     res.status(200).json({
       success: true,
-      data: surveys.reduce((result, survey) => {
-        if (survey.visibleTo && survey.visibleTo.length > 0) {
-          const isVisible = survey.visibleTo.map(n => n._id.toString());
-          if (isVisible.indexOf(req.user.id) > -1) {
-            result.push(Object.assign(survey, { answers: [] }));
-            return result;
-          }
-          return result;
-        }
-        result.push(Object.assign(survey, { answers: [] }));
-        return result;
-      }, [])
+      data
     });
   } catch (err) {
     res.status(400).json({ messages: ['Error fetching surveys.'] });

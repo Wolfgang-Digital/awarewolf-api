@@ -8,7 +8,8 @@
     "start": "npm run clean && npm run build && node ./build/index.js",
     "start:dev": "cd src && nodemon index.js --exec babel-node --presets env",
     "clean": "rm -rf build && mkdir build",
-    "build": "babel -d ./build ./src"
+    "build": "babel -d ./build ./src",
+    "logs": "heroku logs --tail"
   },
   "keywords": [],
   "author": "",
