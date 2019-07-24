@@ -4,10 +4,6 @@ const surveyController = {};
 
 surveyController.fetch = async (req, res) => {
   try {
-    if (!req.user.roles.includes('manager')) {
-      return res.status(200).json({ success: true, data: [] });
-    }
-
     const surveys = await db.Survey.find({}).populate('visibleTo', '_id');
 
     res.status(200).json({
