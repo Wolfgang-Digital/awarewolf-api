@@ -184,6 +184,8 @@ postController.pin = async (req, res) => {
   }
 };
 
+const capitaliseWord = word => word.charAt(0).toUpperCase() + word.substring(1).toLowerCase();
+
 const sendEmail = async (user, title, postId) => {
   const transporter = nodemailer.createTransport({
     service: 'Sendgrid',
