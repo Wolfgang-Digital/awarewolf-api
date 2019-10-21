@@ -34,8 +34,6 @@ app.listen(PORT, () => {
   if (process.env.NODE_ENV !== 'production') console.log(`Running on ${PORT}`);
 });
 
-console.log(process.env.NODE_ENV, JSON.stringify(process.env.DB_URI));
-
 // MongoDB configuration.
 mongoose.connect(
   process.env.DB_URI,

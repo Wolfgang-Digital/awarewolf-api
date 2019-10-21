@@ -58,7 +58,9 @@ postController.create = async (req, res) => {
     const users = await db.User.find({});
 
     users.forEach(user => {
-      sendEmail(user, req.body.title, newPost.id);
+      sendEmail(user, req.body.title, newPost.id).then(() => {
+        console.log('Email sent');
+      }).catch(console.error);
     });
 
     return res.status(200).json({
@@ -182,7 +184,7 @@ postController.pin = async (req, res) => {
   }
 };
 
-const sendEmail = (user, title, postId) => {
+const sendEmail = async (user, title, postId) => {
   const transporter = nodemailer.createTransport({
     service: 'Sendgrid',
     auth: {
@@ -199,7 +201,7 @@ const sendEmail = (user, title, postId) => {
       + `A new suggestion has been posted to Awarewolf\n\n`
       + `You can view it here: https://awarewolf.netlify.com/posts/${postId}`
   };
-  transporter.sendMail(mailOptions);
+  await transporter.sendMail(mailOptions);
 };
 
 export default postController;
