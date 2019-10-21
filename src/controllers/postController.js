@@ -59,7 +59,6 @@ postController.create = async (req, res) => {
 
     users.forEach(user => {
       sendEmail(user, req.body.title, newPost.id).then(() => {
-        console.log('Email sent');
       }).catch(console.error);
     });
 
