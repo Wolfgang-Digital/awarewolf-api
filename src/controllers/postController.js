@@ -1,3 +1,5 @@
+import nodemailer from 'nodemailer';
+
 import db from '../models';
 
 const postController = {};
@@ -31,7 +33,6 @@ postController.findById = async (req, res) => {
       data: post
     });
   } catch (err) {
-    //console.log('Error: ', err);
     res.status(500).json({ messages: ['Database error.'] });
   }
 };
@@ -53,12 +54,18 @@ postController.create = async (req, res) => {
   try {
     await post.save();
     const newPost = await db.Post.findById(post._id);
+
+    const users = await db.User.find({});
+
+    users.forEach(user => {
+      sendEmail(user, req.body.title, newPost.id);
+    });
+
     return res.status(200).json({
       success: true,
       data: newPost
     });
   } catch (err) {
-    //console.log('Error: ', err);
     res.status(500).json({ messages: ['Database error.'] });
   }
 };
@@ -141,7 +148,6 @@ postController.resolve = async (req, res) => {
       message: post.isResolved ? 'Post resolved!' : 'Post re-opened!'
     });
   } catch (err) {
-    //console.log('Error: ', err);
     res.status(500).json({ messages: ['Database error.'] });
   }
 };
@@ -174,6 +180,26 @@ postController.pin = async (req, res) => {
     //console.log('Error: ', err);
     res.status(500).json({ messages: ['Database error.'] });
   }
+};
+
+const sendEmail = (user, title, postId) => {
+  const transporter = nodemailer.createTransport({
+    service: 'Sendgrid',
+    auth: {
+      user: process.env.SENDGRID_USERNAME,
+      pass: process.env.SENDGRID_PASSWORD
+    }
+  });
+  const mailOptions = {
+    from: 'no-reply@awarewolf.com',
+    to: user.email,
+    subject: `New Suggestion: ${title}`,
+    text:
+      `Hi ${capitaliseWord(user.username)},\n\n`
+      + `A new suggestion has been posted to Awarewolf\n\n`
+      + `You can view it here: https://awarewolf.netlify.com/posts/${postId}`
+  };
+  transporter.sendMail(mailOptions);
 };
 
 export default postController;

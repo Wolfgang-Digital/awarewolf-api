@@ -8,19 +8,16 @@
     "start": "npm run clean && npm run build && node ./build/index.js",
     "start:dev": "cd src && nodemon index.js --exec babel-node --presets env",
     "clean": "rm -rf build && mkdir build",
-    "build": "babel -d ./build ./src",
-    "logs": "heroku logs --tail"
+    "build": "babel -d ./build ./src"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@google-cloud/bigquery": "^2.0.6",
-    "babel-cli": "^6.26.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.7.0",
-    "bcrypt": "^3.0.0",
+    "bcrypt": "^3.0.6",
     "body-parser": "^1.18.3",
     "cloudinary": "^1.11.0",
     "compression": "^1.7.3",
@@ -29,13 +26,11 @@
     "dotenv": "^6.0.0",
     "express": "^4.16.3",
     "express-validator": "^5.3.0",
-    "googleapis": "^36.0.0",
     "jsonwebtoken": "^8.3.0",
-    "mongoose": "^5.2.7",
+    "mongoose": "^5.7.5",
     "morgan": "^1.9.0",
     "multer": "^1.4.1",
-    "nodemailer": "^4.6.8",
-    "squel": "^5.12.2"
+    "nodemailer": "^4.6.8"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
