@@ -194,9 +194,9 @@ const sendEmail = async (user, title, postId) => {
     }
   });
   const mailOptions = {
-    from: 'no-reply@awarewolf.com',
+    from: 'awarewolf@wolfgangdigital.com',
     to: user.email,
-    subject: `New Suggestion: ${title}`,
+    subject: `New suggestion on Awarewolf: ${title}`,
     text:
       `Hi ${capitaliseWord(user.username)},\n\n`
       + `A new suggestion has been posted to Awarewolf\n\n`
